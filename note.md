@@ -8,10 +8,10 @@
 5. [DataLoader](#DataLoader)
 6. [nn.Module-conv](#nn.Module)
 7. [Pooling](#Pooling)
-8. [Non-linear Activations](#Non-linear Activations)
+8. [Non-linear Activations](#Non-linear)
 9. [其他层简介](#others)
 10. [CIFAR10 模型搭建](#CIFAR10)
-11. [Loss Function](#Loss Function)
+11. [Loss Function](#LossFunction)
 ## Dataset
 <a id="Dataset"></a>
 
@@ -390,7 +390,7 @@ print(output)
 ```
 
 ## Non-linear Activations
-<a id="Non-linear Activations"></a>
+<a id="Non-linear"></a>
 
 #### ReLu函数
 ![](https://s3.bmp.ovh/imgs/2021/09/210c3237fd64bd58.png)
@@ -481,7 +481,7 @@ writer.close()
 ![](https://s3.bmp.ovh/imgs/2021/09/5b61aa43783cca97.png)
 
 ## Loss Function
-<a id="Loss Function"></a>
+<a id="LossFunction"></a>
 
 #### L1LOSS
 ![](https://s3.bmp.ovh/imgs/2021/09/7fc7338dbed4f8db.png)
