@@ -8,7 +8,10 @@
 5. [DataLoader](#DataLoader)
 6. [nn.Module-conv](#nn.Module)
 7. [Pooling](#Pooling)
-
+8. [Non-linear Activations](#Non-linear Activations)
+9. [其他层简介](#others)
+10. [CIFAR10 模型搭建](#CIFAR10)
+11. [Loss Function](#Loss Function)
 ## Dataset
 <a id="Dataset"></a>
 
@@ -384,4 +387,179 @@ output = model1(input)
 print(output)
 # tensor([[[[2., 2.],
 #           [2., 2.]]]])
+```
+
+## Non-linear Activations
+<a id="Non-linear Activations"></a>
+
+#### ReLu函数
+![](https://s3.bmp.ovh/imgs/2021/09/210c3237fd64bd58.png)
+
+#### Sigmoid函数
+![](https://s3.bmp.ovh/imgs/2021/09/65e9c008b9b3579e.png)
+![](https://s3.bmp.ovh/imgs/2021/09/cd0b99ebc959c363.png)
+
+
+##  其他层简介
+<a id="others"></a>
+
+| Layer | function | work |
+| --- | --- | --- |
+| Normalization Layers | nn.BatchNorm2d | 批量正则化  |
+| Transformer Layers | nn.Transformer | Transformer网络 |
+| Linear Layers | nn.Linear | 线性化 |
+|  | nn.Bilinear | 双线性化 |
+| Dropout Layers | nn.Dropout2d | 随机归零 |
+| Sparse Layers | nn.Embedding | 查找表 |
+
+## CIFAR10 模型搭建
+<a id="CIFAR10"></a>
+
+#### CIFAR10 模型结构
+![](https://s3.bmp.ovh/imgs/2021/09/9f60e5b19aa07bf5.png)
+
+#### 代码
+```python
+import torch
+from torch import nn
+from torch.nn import Conv2d, MaxPool2d, Flatten, Linear, Sequential
+from torch.utils.tensorboard import SummaryWriter
+
+
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        # self.conv1 = Conv2d(3, 32, 5, padding=2)
+        # self.maxpool1 = MaxPool2d(2)
+        # self.conv2 = Conv2d(32, 32, 5, padding=2)
+        # self.maxpool2 = MaxPool2d(2)
+        # self.conv3 = Conv2d(32, 64, 5, padding=2)
+        # self.maxpool3 = MaxPool2d(2)
+        # self.flatten = Flatten()
+        # self.linnear1 = Linear(1024, 64)
+        # self.linnear2 = Linear(64, 10)
+
+        self.model1 = Sequential(
+            Conv2d(3, 32, 5, padding=2),
+            MaxPool2d(2),
+            Conv2d(32, 32, 5, padding=2),
+            MaxPool2d(2),
+            Conv2d(32, 64, 5, padding=2),
+            MaxPool2d(2),
+            Flatten(),
+            Linear(1024, 64),
+            Linear(64, 10)
+        )
+
+    def forward(self, x):
+        # x = self.conv1(x)
+        # x = self.maxpool1(x)
+        # x = self.conv2(x)
+        # x = self.maxpool2(x)
+        # x = self.conv3(x)
+        # x = self.maxpool3(x)
+        # x = self.flatten(x)
+        # x = self.linnear1(x)
+        # x = self.linnear2(x)
+        x = self.model1(x)
+        return x
+
+
+mymodel1 = MyModel()
+print(mymodel1)
+input = torch.ones((64, 3, 32, 32))
+output = mymodel1(input)
+print(output.shape)
+
+writer = SummaryWriter("log_seq")
+writer.add_graph(mymodel1, input)
+writer.close()
+```
+#### tensorboard可视化显示
+`tensorboard --logdir="log_seq"`
+
+![](https://s3.bmp.ovh/imgs/2021/09/5b61aa43783cca97.png)
+
+## Loss Function
+<a id="Loss Function"></a>
+
+#### L1LOSS
+![](https://s3.bmp.ovh/imgs/2021/09/7fc7338dbed4f8db.png)
+
+#### MSELOSS
+![](https://s3.bmp.ovh/imgs/2021/09/1fd82b1021e248fc.png)
+
+#### CROSSENTROPYLOSS
+![](https://s3.bmp.ovh/imgs/2021/09/6fdf715bb1b801f9.png)
+
+#### 优化器
+torch.optim 是一个实现各种优化算法的包。支持大部分常用算法，具有足够的通用接口。
+##### 常见算法
+| Algorithms | work |
+| --- | --- |
+| SGD | 梯度下降 |
+| ADAGRAD | 用于在线学习和随机优化的自适应次梯度方法 |
+| ADADELTA | 自适应学习率法 |
+| RMSprop | 使用循环神经网络生成序列 |
+| ADAMAX | 随机优化法 |
+| 。。。 | |
+
+##### 使用方法（模型训练）
+```python
+import torch
+import torchvision.datasets
+from torch import nn
+from torch.nn import Sequential, Conv2d, MaxPool2d, Flatten, Linear
+from torch.utils.data import DataLoader
+# 导入数据集
+dataset = torchvision.datasets.CIFAR10("./vision_dataset", train=False, transform=torchvision.transforms.ToTensor(),
+                                       download=False)
+dataloader = DataLoader(dataset, batch_size=1)
+
+# 构建网络
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+
+        self.model1 = Sequential(
+            Conv2d(3, 32, 5, padding=2),
+            MaxPool2d(2),
+            Conv2d(32, 32, 5, padding=2),
+            MaxPool2d(2),
+            Conv2d(32, 64, 5, padding=2),
+            MaxPool2d(2),
+            Flatten(),
+            Linear(1024, 64),
+            Linear(64, 10)
+        )
+
+    def forward(self, x):
+        x = self.model1(x)
+        return x
+
+
+mymodel1 = MyModel()
+# 定义交叉熵损失函数
+loss = nn.CrossEntropyLoss()
+# 定义梯度下降分类器
+optim = torch.optim.SGD(mymodel1.parameters(), lr=0.01)
+# 开始训练
+for epoch in range(20):
+    # 每次训练前初始化损失值
+    running_loss = 0.0
+    for data in dataloader:
+        imgs, targets =data
+        output = mymodel1(imgs)
+        # 计算损失值
+        result_loss = loss(output, targets)
+        # 梯度值清零
+        optim.zero_grad()
+        # 反向传播
+        result_loss.backward()
+        # 参数更新
+        optim.step()
+        # 损失值求和
+        running_loss = running_loss + result_loss
+
+    print(running_loss)
 ```
